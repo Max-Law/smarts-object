@@ -102,3 +102,4 @@
      //直接使用
      this.$set(target,prop,value)
      ```
+# smarts-object
