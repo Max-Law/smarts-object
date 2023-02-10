@@ -1,0 +1,15 @@
+# 忽略目录
+.vscode/
+lib/
+node_modules/
+public/
+src/
+
+# 忽略指定文件
+.browserslistrc
+.eslintrc.js
+.gitignore
+babel.config.js
+jsconfig.json
+vue.config.js
+*.map
