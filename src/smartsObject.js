@@ -22,17 +22,21 @@ export const SMARTS_OBJECT = (
   let list = []; //解构 propertyName 后的数组
 
   //以 . 区分切割成数组 , 解构 [] 对象写法
-  const regex = /(?<=\[)(.+?)(?=\])/g;
+  const regex = /(\[)(.+?)(?=\])/g;
   propertyName.split('.').forEach((item) => {
     const objProp = item.replace(/\[.+?\]/g, '');
-    let arrayProp = item.match(regex) || [];
+    const arrayProp = item.match(regex) || [];
+
+    let filterProp = arrayProp.map((currentValue) => {
+      return currentValue.replace(/\[/g, '');
+    });
 
     if (objProp) {
       // @ts-ignore
-      arrayProp.unshift(objProp);
+      filterProp.unshift(objProp);
     }
 
-    list.push(...arrayProp);
+    list.push(...filterProp);
   });
 
   //创建不存在对象函数

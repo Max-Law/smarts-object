@@ -1,105 +1,92 @@
 # smarts-object
 
-#### 介绍
+#### Introduction
 
-根据 JS 对象字符串智能查找对象值，新建对象，改变对象值，并提供 vue.$set 使用帮助。
+Find the object value intelligently according to the JS object string, create a new object, change the object value, and provide vue$ Set use help.
 
-#### 安装教程
+#### Installation Tutorial
 
 `npm i smarts-object`
-
 `yarn add smarts-object`
 
-#### 使用说明
+#### Instructions for use
 
-1. 文件引入 ：
-
+1. File import:
    `import smartsObj from "smarts-object";`
-
-2. 参数：
-
-   - { string } type [ find,created,change,vue ]【可选的操作类型】
-   - { string } propertyName【对象字符串】
-   - { object } target【目标对象】
-   - { any } value [ null ]【如需添加修改值可选】
-
-3. 使用：
-
-   例子对象：
+2. Parameters:
+   -{string} type [find, created, change, vue] [optional operation type]
+   -{string} propertyName [object string]
+   -{object} target [target object]
+   -{any} value [null]
+3. Use:
+   Example object:
    `const example = { a: 1, b: { c: [1, 2, 3] } };`
+   -Find
 
-   - 查找
+```
+smartsObj("find", "b.c[0]", example); // one
+smartsObj("find", "d", example); // undefined
+```
 
-   ```
-   smartsObj("find", "b.c[0]", example); //1
-   smartsObj("find", "d", example); //undefined
-   ```
+- New
+  If the query object exists, the query value is returned directly; If it does not exist, it returns undefined and creates a new object for the target. The default value is null.
 
-   - 新建
+```
+smartsObj("created", "b.d", example); // undefined
+console.log(example); // {"a":1,"b":{"c":[1,2,3],"d":null}}
+```
 
-   假如查询对象存在，则直接返回查询值；不存在则返回 undefined ，并同时为目标创建新对象，值默认为 null。
+Add value:
 
-   ```
-   smartsObj("created", "b.d", example); //undefined
-   console.log(example); //{"a":1,"b":{"c":[1,2,3],"d":null}}
-   ```
+```
+//The query object does not exist
+smartsObj("created", "d[2]", example, 4); // undefined
+console.log(example); // {"a":1,"b":{"c":[1,2,3]},"d":[null,null,4]}
+```
 
-   添加值：
+```
+//Query object existence
+smartsObj("created", "b.c[0]", example, 4); // one
+console.log(example); // {"a": 1, "b": {"c": [1,2,3]}, does not change the value;
+```
 
-   ```
-   //查询对象不存在情况
-   smartsObj("created", "d[2]", example, 4); //undefined
-   console.log(example); //{"a":1,"b":{"c":[1,2,3]},"d":[null,null,4]}
-   ```
+It can also be used as object string to object:
 
-   ```
-   //查询对象存在情况
-   smartsObj("created", "b.c[0]", example, 4); //1
-   console.log(example); //{"a":1,"b":{"c":[1,2,3]}}，并不会改变值；
-   ```
+```
+//Create a new object in the specified format
+var tag = {};
+smartsObj("created", "a.b.c", tag, 4); // undefined
+console.log(tag); // {"a":{"b":{"c":4}}}
+```
 
-   也可当作对象字符串转对象使用：
+- Modify
+  It is roughly the same as created, except that when the query object exists, its value must be modified. If no value is passed, it will be modified to null by default
 
-   ```
-   //创建一个规定格式的全新对象
-   var tag = {};
-   smartsObj("created", "a.b.c", tag, 4); //undefined
-   console.log(tag); //{"a":{"b":{"c":4}}}
-   ```
+```
+//Query object existence
+smartsObj("change", "b.c[0]", example, 4); // 1 Return the value before modification
+console.log(example); // {"a":1,"b":{"c":[4,2,3]}}
+```
 
-   - 修改
+- vue.$ set
+  Due to the problem of the response principle of vue 2, it is not possible to detect the changes of arrays and objects, especially for objects that have not been created. In order to ensure monitoring, vue is generally used$ Set this api. Here is a method to facilitate the parameter generation of this api.
+  -Query object existence
 
-   与 created 大致相同，只是当查询对象存在时必定修改其值，如未传 value 则默认修改为 null
+```
+//Return object {"target": [1,2,3], "prop": "0", "value": 4}
+const { target, prop, value } = smartsObj("vue", "b.c[0]", example, 4);
+//Direct use
+this.$ set(target,prop,value)
+```
 
-   ```
-   //查询对象存在情况
-   smartsObj("change", "b.c[0]", example, 4); //1 返回被修改前的值
-   console.log(example); //{"a":1,"b":{"c":[4,2,3]}}
-   ```
+- The query object does not exist
+  Target will return the last existing object;
+  The next key name of the last existing object in prop;
+  New object created by value;
 
-   - vue.$set
-
-   因 vue2 响应式原理的问题，不能检测数组和对象的变化，对于未创建的对象更是如此，为了能保证监听一般采用 vue.$set 这个 api，这里提供了方便此 api 的参数生成的方法。
-
-     - 查询对象存在情况
-
-     ```
-     //返回对象 {"target":[1,2,3],"prop":"0","value":4}
-     const { target, prop, value } = smartsObj("vue", "b.c[0]", example, 4);
-     //直接使用
-     this.$set(target,prop,value)
-     ```
-
-     - 查询对象不存在情况
-
-     target 会返回最后一个存在的对象；
-     prop 最后一个存在对象的下一个 key 名；
-     value 创建的新对象；
-
-     ```
-     //返回对象 {"target":{"c":[1,2,3]},"prop":"d","value":{"e": 4}}
-     const { target, prop, value } = smartsObj("vue", "b.d.e", example, 4);
-     //直接使用
-     this.$set(target,prop,value)
-     ```
-# smarts-object
+```
+//Return object {"target": {"c": [1,2,3]}, "prop": "d", "value": {"e": 4}}
+const { target, prop, value } = smartsObj("vue", "b.d.e", example, 4);
+//Direct use
+this.$ set(target,prop,value)
+```
