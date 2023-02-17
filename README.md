@@ -7,86 +7,89 @@ Find the object value intelligently according to the JS object string, create a 
 #### Installation Tutorial
 
 `npm i smarts-object`
+
 `yarn add smarts-object`
 
 #### Instructions for use
 
-1. File import:
-   `import smartsObj from "smarts-object";`
-2. Parameters:
-   -{string} type [find, created, change, vue] [optional operation type]
-   -{string} propertyName [object string]
-   -{object} target [target object]
-   -{any} value [null]
-3. Use:
-   Example object:
-   `const example = { a: 1, b: { c: [1, 2, 3] } };`
-   -Find
+1.  File import:
+    `import smartsObj from "smarts-object";`
+2.  Parameters:
+    - {string} type [find, created, change, vue] [optional operation type]
+    - {string} propertyName [object string]
+    - {object} target [target object]
+    - {any} value [null]
+3.  Use:
+    Example object:
+    `const example = { a: 1, b: { c: [1, 2, 3] } };`
 
-```
-smartsObj("find", "b.c[0]", example); // one
-smartsObj("find", "d", example); // undefined
-```
+    - Find
 
-- New
-  If the query object exists, the query value is returned directly; If it does not exist, it returns undefined and creates a new object for the target. The default value is null.
+      ```
+      smartsObj("find", "b.c[0]", example); // one
+      smartsObj("find", "d", example); // undefined
+      ```
 
-```
-smartsObj("created", "b.d", example); // undefined
-console.log(example); // {"a":1,"b":{"c":[1,2,3],"d":null}}
-```
+    - Created
+      If the query object exists, the query value is returned directly; If it does not exist, it returns undefined and creates a new object for the target. The default value is null.
 
-Add value:
+      ```
+      smartsObj("created", "b.d", example); // undefined
+      console.log(example); // {"a":1,"b":{"c":[1,2,3],"d":null}}
+      ```
 
-```
-//The query object does not exist
-smartsObj("created", "d[2]", example, 4); // undefined
-console.log(example); // {"a":1,"b":{"c":[1,2,3]},"d":[null,null,4]}
-```
+      - Add value:
 
-```
-//Query object existence
-smartsObj("created", "b.c[0]", example, 4); // one
-console.log(example); // {"a": 1, "b": {"c": [1,2,3]}, does not change the value;
-```
+      ```
+      //The query object does not exist
+      smartsObj("created", "d[2]", example, 4); // undefined
+      console.log(example); // {"a":1,"b":{"c":[1,2,3]},"d":[null,null,4]}
+      ```
 
-It can also be used as object string to object:
+      ```
+      //Query object existence
+      smartsObj("created", "b.c[0]", example, 4); // one
+      console.log(example); // {"a": 1, "b": {"c": [1,2,3]}, does not change the value;
+      ```
 
-```
-//Create a new object in the specified format
-var tag = {};
-smartsObj("created", "a.b.c", tag, 4); // undefined
-console.log(tag); // {"a":{"b":{"c":4}}}
-```
+      It can also be used as object string to object:
 
-- Modify
-  It is roughly the same as created, except that when the query object exists, its value must be modified. If no value is passed, it will be modified to null by default
+      ```
+      //Create a new object in the specified format
+      var tag = {};
+      smartsObj("created", "a.b.c", tag, 4); // undefined
+      console.log(tag); // {"a":{"b":{"c":4}}}
+      ```
 
-```
-//Query object existence
-smartsObj("change", "b.c[0]", example, 4); // 1 Return the value before modification
-console.log(example); // {"a":1,"b":{"c":[4,2,3]}}
-```
+      - Modify
+        It is roughly the same as created, except that when the query object exists, its value must be modified. If no value is passed, it will be modified to null by default
 
-- vue.$ set
-  Due to the problem of the response principle of vue 2, it is not possible to detect the changes of arrays and objects, especially for objects that have not been created. In order to ensure monitoring, vue is generally used$ Set this api. Here is a method to facilitate the parameter generation of this api.
-  -Query object existence
+      ```
+      //Query object existence
+      smartsObj("change", "b.c[0]", example, 4); // 1 Return the value before modification
+      console.log(example); // {"a":1,"b":{"c":[4,2,3]}}
+      ```
 
-```
-//Return object {"target": [1,2,3], "prop": "0", "value": 4}
-const { target, prop, value } = smartsObj("vue", "b.c[0]", example, 4);
-//Direct use
-this.$ set(target,prop,value)
-```
+      - vue.$set
+      Due to the problem of the response principle of vue 2, it is not possible to detect the changes of arrays and objects, especially for objects that have not been created. In order to ensure monitoring, vue is generally used$ Set this api. Here is a method to facilitate the parameter generation of this api.
 
-- The query object does not exist
-  Target will return the last existing object;
-  The next key name of the last existing object in prop;
-  New object created by value;
+        - Query existence object
 
-```
-//Return object {"target": {"c": [1,2,3]}, "prop": "d", "value": {"e": 4}}
-const { target, prop, value } = smartsObj("vue", "b.d.e", example, 4);
-//Direct use
-this.$ set(target,prop,value)
-```
+          ```
+          //Return object {"target": [1,2,3], "prop": "0", "value": 4}
+          const { target, prop, value } = smartsObj("vue", "b.c[0]", example, 4);
+          //Direct use
+          this.$ set(target,prop,value)
+          ```
+
+        - The query object does not exist
+          Target will return the last existing object;
+          The next key name of the last existing object in prop;
+          New object created by value;
+
+          ```
+          //Return object {"target": {"c": [1,2,3]}, "prop": "d", "value": {"e": 4}}
+          const { target, prop, value } = smartsObj("vue", "b.d.e", example, 4);
+          //Direct use
+          this.$ set(target,prop,value)
+          ```
